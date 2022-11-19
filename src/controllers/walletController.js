@@ -1,9 +1,9 @@
+import { moneyInOrOutSchema } from "../index.js";
 import {
-  moneyInOrOutSchema,
   sessionsCollection,
   usersCollection,
   walletCollection,
-} from "../index.js";
+} from "../database/db.js";
 import dayjs from "dayjs";
 
 export async function postMoneyIn(req, res) {

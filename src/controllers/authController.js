@@ -1,12 +1,7 @@
 import bcrypt from "bcrypt";
 import { v4 as uuid } from "uuid";
-import {
-  usersCollection,
-  sessionsCollection,
-  signInSchema,
-  signUpSchema,
-  moneyInOrOutSchema,
-} from "../index.js";
+import { signInSchema, signUpSchema, moneyInOrOutSchema } from "../index.js";
+import { usersCollection, sessionsCollection } from "../database/db.js";
 
 export async function postSignUp(req, res) {
   const body = req.body;
@@ -53,12 +48,12 @@ export async function postSignIn(req, res) {
     }
 
     if (!user) {
-      return res.sendStatus(401);
+      return res.status(401).send("E-mail não cadrastrado");
     }
 
     const rightPassword = bcrypt.compareSync(password, user.password);
     if (!rightPassword) {
-      return res.sendStatus(401);
+      return res.status(401).send("Senha incorreta");
     }
 
     await sessionsCollection.insertOne({
@@ -66,7 +61,7 @@ export async function postSignIn(req, res) {
       token,
     });
 
-    res.send({ token });
+    res.send({ token, username: user.name });
   } catch (err) {
     console.log(err);
     res.sendStatus(500);
