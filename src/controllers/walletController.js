@@ -53,3 +53,29 @@ export async function getWallet(req, res) {
     res.sendStatus(500);
   }
 }
+
+export async function deleteInOrOut(req,res) {
+  const id = req.id
+
+  try{
+    await walletCollection.deleteOne({_id: id})
+    res.sendStatus(200)
+
+  }catch(err){
+    console.log(err)
+    res.sendStatus(500)
+  }
+
+}
+
+export async function putInOrOut(req,res) {
+  const id = req.id
+  const moneyInOrOut = req.moneyInOrOut
+  try{
+    await walletCollection.updateOne({_id:id}, {$set: moneyInOrOut})
+    res.sendStatus(200);
+  }catch(err){
+    console.log(err)
+    res.sendStatus(500)
+  }
+}
