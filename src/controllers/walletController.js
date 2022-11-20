@@ -1,35 +1,12 @@
-import { moneyInOrOutSchema } from "../index.js";
 import {
-  sessionsCollection,
-  usersCollection,
   walletCollection,
 } from "../database/db.js";
 import dayjs from "dayjs";
 
 export async function postMoneyIn(req, res) {
-  const moneyInOrOut = req.body;
-  const { authorization } = req.headers;
-  const token = authorization?.replace("Bearer ", "");
-
-  if (!token) {
-    return res.sendStatus(401);
-  }
-
-  const { error } = moneyInOrOutSchema.validate(moneyInOrOut, {
-    abortEarly: false,
-  });
-  if (error) {
-    const erros = error.details.map((detail) => detail.message);
-    return res.status(422).send(erros);
-  }
-
+  const user =req.user
+  const moneyInOrOut = req.moneyInOrOut
   try {
-    const session = await sessionsCollection.findOne({ token });
-    const user = await usersCollection.findOne({ _id: session?.userId });
-    if (!user) {
-      return res.sendStatus(401);
-    }
-
     await walletCollection.insertOne({
       ...moneyInOrOut,
       date: dayjs().format("DD/MM"),
@@ -45,29 +22,9 @@ export async function postMoneyIn(req, res) {
 }
 
 export async function postMoneyOut(req, res) {
-  const moneyInOrOut = req.body;
-  const { authorization } = req.headers;
-  const token = authorization?.replace("Bearer ", "");
-
-  if (!token) {
-    return res.sendStatus(401);
-  }
-
-  const { error } = moneyInOrOutSchema.validate(moneyInOrOut, {
-    abortEarly: false,
-  });
-  if (error) {
-    const erros = error.details.map((detail) => detail.message);
-    res.status(422).send(erros);
-  }
-
+  const user = req.user
+  const moneyInOrOut = req.moneyInOrOut
   try {
-    const session = await sessionsCollection.findOne({ token });
-    const user = await usersCollection.findOne({ _id: session?.userId });
-    if (!user) {
-      return res.sendStatus(401);
-    }
-
     await walletCollection.insertOne({
       ...moneyInOrOut,
       date: dayjs().format("DD/MM"),
@@ -83,20 +40,10 @@ export async function postMoneyOut(req, res) {
 }
 
 export async function getWallet(req, res) {
-  const { authorization } = req.headers;
-  const token = authorization?.replace("Bearer ", "");
-
-  if (!token) {
-    return res.sendStatus(401);
-  }
+  
+  const user = req.user
 
   try {
-    const session = await sessionsCollection.findOne({ token });
-    const user = await usersCollection.findOne({ _id: session?.userId });
-    if (!user) {
-      return res.sendStatus(401);
-    }
-
     const moneyControl = await walletCollection
       .find({ userId: user._id })
       .toArray();
